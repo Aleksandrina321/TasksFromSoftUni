@@ -1,0 +1,75 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace WordCount
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            using var reader = new StreamReader("words.txt");
+            using var secondReader = new StreamReader("text.txt");
+            using var writer = new StreamWriter("output.txt");
+
+            List<string> mainWords = new List<string>();
+            List<string> inputWords = new List<string>();
+            Dictionary<string, int> countWords = new Dictionary<string, int>();
+
+            mainWords = reader.ReadLine().Split(" ", StringSplitOptions.RemoveEmptyEntries).ToList();
+            
+            while (true)
+            {
+                var input = secondReader.ReadLine();
+                string builtWord = "";
+                bool isThereWord = false;
+
+                if (input == null)
+                {
+                    break;
+                }
+
+                for (int i = 0; i < input.Length; i++)
+                {
+                    char symbol = input[i];
+                    if (char.IsLetter(symbol))
+                    {
+                        builtWord += symbol;
+                        isThereWord = true;
+                    }
+                    else
+                    {
+                        if (isThereWord)
+                        {
+                            inputWords.Add(builtWord.ToLower());
+                            isThereWord = false;
+                            builtWord = "";
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < inputWords.Count; i++)
+            {
+                string word = inputWords[i];
+                if (mainWords.Contains(word))
+                {
+                    if (!countWords.ContainsKey(word))
+                    {
+                        countWords.Add(word, 0);
+                    }
+                    countWords[word]++;
+                }
+            }
+
+            countWords = countWords.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+
+            foreach (var word in countWords)
+            {
+                string line = $"{word.Key} - {word.Value}";
+                writer.WriteLine(line);
+            }
+        }
+    }
+}
